@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net9.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<Authors>Yusuf Ünal</Authors>
+		<Company>Yusuf Ünal</Company>
+		<PackageProjectUrl>https://github.com/theunal/UEntity.ElasticSeach</PackageProjectUrl>
+		<Description>The IEntityRepositoryElasticSeach interface provides a repository abstraction for performing CRUD (Create, Read, Update, Delete) and query operations on ElasticSeach collections. The interface provides synchronous and asynchronous methods for managing operations on a given type (T). This structure simplifies ElasticSeach operations while offering flexibility and extensibility.</Description>
+		<PackageIcon>logo.png</PackageIcon>
+		<PackageTags>elasticsearch generic repository</PackageTags>
+		<RepositoryType>git</RepositoryType>
+		<Version>7.17.5</Version>
+		<PackageReadmeFile>readme.md</PackageReadmeFile>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="..\logo.png">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+		<None Include="..\readme.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.3" />
+		<PackageReference Include="NEST" Version="7.17.5" />
+	</ItemGroup>
+
+</Project>
