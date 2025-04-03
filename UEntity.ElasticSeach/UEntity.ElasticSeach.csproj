@@ -12,7 +12,7 @@
 		<PackageIcon>logo.png</PackageIcon>
 		<PackageTags>elasticsearch generic repository</PackageTags>
 		<RepositoryType>git</RepositoryType>
-		<Version>7.17.5</Version>
+		<Version>7.17.5.1</Version>
 		<PackageReadmeFile>readme.md</PackageReadmeFile>
 	</PropertyGroup>
 

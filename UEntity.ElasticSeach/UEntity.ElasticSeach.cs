@@ -11,6 +11,7 @@ public interface IEntityRepositoryElasticSeach<T> where T : class
     Task AddRangeAsync<T, TKey>(IEnumerable<T> items, Func<T, TKey> keySelector, int chunkSize = 2000);
     Task UpdateAsync(T document, string id);
     Task DeleteAsync(string id);
+    Task ExecuteDeleteAsync(Func<QueryContainerDescriptor<T>, QueryContainer> filter);
 }
 
 public class EntityRepositoryElasticSeach<T>(string indexName) : IEntityRepositoryElasticSeach<T> where T : class
@@ -46,6 +47,10 @@ public class EntityRepositoryElasticSeach<T>(string indexName) : IEntityReposito
     public Task DeleteAsync(string id)
     {
         return UEntityElasticSearchExtensions.UEntityElasticClient!.DeleteAsync(new DeleteRequest(indexName, id));
+    }
+    public Task ExecuteDeleteAsync(Func<QueryContainerDescriptor<T>, QueryContainer> filter)
+    {
+        return UEntityElasticSearchExtensions.UEntityElasticClient!.DeleteByQueryAsync<T>(q => q.Query(filter));
     }
 }
 public static class UEntityElasticSearchExtensions
