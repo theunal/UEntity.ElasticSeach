@@ -7,23 +7,23 @@ namespace UEntity.ElasticSeach;
 public interface IEntityRepositoryElasticSeach<T> where T : class
 {
     Task<T?> GetAsync(string id);
-    Task AddAsync(T document, string id);
+    Task<IndexResponse> AddAsync(T document, string id);
     Task AddRangeAsync<T, TKey>(IEnumerable<T> items, Func<T, TKey> keySelector, int chunkSize = 2000);
-    Task UpdateAsync(T document, string id);
-    Task DeleteAsync(string id);
-    Task ExecuteDeleteAsync(Func<QueryContainerDescriptor<T>, QueryContainer> filter);
+    Task<UpdateResponse<T>> UpdateAsync(T document, string id);
+    Task<DeleteResponse> DeleteAsync(string id);
+    Task<DeleteByQueryResponse> ExecuteDeleteAsync(Func<QueryContainerDescriptor<T>, QueryContainer> filter);
 }
 
 public class EntityRepositoryElasticSeach<T>(string indexName) : IEntityRepositoryElasticSeach<T> where T : class
 {
     public async Task<T?> GetAsync(string id)
     {
-        var response = await UEntityElasticSearchExtensions.UEntityElasticClient!.GetAsync<T>(id, g => g.Index(indexName));
+        var response = await UEntityElasticSearchExtensions.UEntityElasticClient!.GetAsync<T>(id, g => g.Index(indexName.ToLower()));
         return !response.IsValid || !response.Found ? null : response.Source;
     }
-    public Task AddAsync(T document, string id)
+    public Task<IndexResponse> AddAsync(T document, string id)
     {
-        return UEntityElasticSearchExtensions.UEntityElasticClient!.IndexAsync(document, idx => idx.Index(indexName).Id(id));
+        return UEntityElasticSearchExtensions.UEntityElasticClient!.IndexAsync(document, idx => idx.Index(indexName.ToLower()).Id(id));
     }
     public async Task AddRangeAsync<T, TKey>(IEnumerable<T> items, Func<T, TKey> keySelector, int chunkSize = 2000)
     {
@@ -35,20 +35,20 @@ public class EntityRepositoryElasticSeach<T>(string indexName) : IEntityReposito
             {
                 var id = keySelector(item)?.ToString();
                 if (string.IsNullOrEmpty(id)) continue;
-                bulkDescriptor.Index<object>(op => op.Index(indexName).Id(id).Document(item!));
+                bulkDescriptor.Index<object>(op => op.Index(indexName.ToLower()).Id(id).Document(item!));
             }
             await UEntityElasticSearchExtensions.UEntityElasticClient!.BulkAsync(bulkDescriptor);
         }
     }
-    public Task UpdateAsync(T document, string id)
+    public Task<UpdateResponse<T>> UpdateAsync(T document, string id)
     {
-        return UEntityElasticSearchExtensions.UEntityElasticClient!.UpdateAsync<T>(id, u => u.Index(indexName).Doc(document));
+        return UEntityElasticSearchExtensions.UEntityElasticClient!.UpdateAsync<T>(id, u => u.Index(indexName.ToLower()).Doc(document));
     }
-    public Task DeleteAsync(string id)
+    public Task<DeleteResponse> DeleteAsync(string id)
     {
-        return UEntityElasticSearchExtensions.UEntityElasticClient!.DeleteAsync(new DeleteRequest(indexName, id));
+        return UEntityElasticSearchExtensions.UEntityElasticClient!.DeleteAsync(new DeleteRequest(indexName.ToLower(), id));
     }
-    public Task ExecuteDeleteAsync(Func<QueryContainerDescriptor<T>, QueryContainer> filter)
+    public Task<DeleteByQueryResponse> ExecuteDeleteAsync(Func<QueryContainerDescriptor<T>, QueryContainer> filter)
     {
         return UEntityElasticSearchExtensions.UEntityElasticClient!.DeleteByQueryAsync<T>(q => q.Query(filter));
     }
