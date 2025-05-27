@@ -50,7 +50,7 @@ public class EntityRepositoryElasticSeach<T>(string indexName) : IEntityReposito
     }
     public Task<DeleteByQueryResponse> ExecuteDeleteAsync(Func<QueryContainerDescriptor<T>, QueryContainer> filter)
     {
-        return UEntityElasticSearchExtensions.UEntityElasticClient!.DeleteByQueryAsync<T>(q => q.Query(filter));
+        return UEntityElasticSearchExtensions.UEntityElasticClient!.DeleteByQueryAsync<T>(q => q.Index(indexName.ToLower()).Query(filter));
     }
 }
 public static class UEntityElasticSearchExtensions
