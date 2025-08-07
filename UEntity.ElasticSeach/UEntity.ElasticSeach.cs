@@ -1,7 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
+using Nest;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
-using Nest;
 
 namespace UEntity.ElasticSeach;
 
@@ -23,12 +23,12 @@ public interface IEntityRepositoryElasticSeach<T> where T : class
        int page,
        int size,
        Func<QueryContainerDescriptor<T>, QueryContainer>? filter = null,
-       List<Func<(Expression<Func<T, object>> Expression, SortOrder Order)>>? sort = null);
+       List<Func<(Expression<Func<T, object?>> Expression, SortOrder Order)>>? sort = null);
     Task<PaginateElastic<T>> GetListPaginateAsync(
       int page,
       int size,
       Func<QueryContainerDescriptor<T>, QueryContainer>? filter = null,
-      List<Func<(Expression<Func<T, object>> Expression, SortOrder Order)>>? sort = null,
+      List<Func<(Expression<Func<T, object?>> Expression, SortOrder Order)>>? sort = null,
       CancellationToken cancellationToken = default);
 }
 
@@ -130,7 +130,7 @@ public class EntityRepositoryElasticSeach<T>(string indexName) : IEntityReposito
         int page,
         int size,
         Func<QueryContainerDescriptor<T>, QueryContainer>? filter = null,
-        List<Func<(Expression<Func<T, object>> Expression, SortOrder Order)>>? sort = null)
+        List<Func<(Expression<Func<T, object?>> Expression, SortOrder Order)>>? sort = null)
     {
         page = page < 1 ? 1 : page;
         size = size <= 0 ? 5 : size;
@@ -178,7 +178,7 @@ public class EntityRepositoryElasticSeach<T>(string indexName) : IEntityReposito
         int page,
         int size,
         Func<QueryContainerDescriptor<T>, QueryContainer>? filter = null,
-        List<Func<(Expression<Func<T, object>> Expression, SortOrder Order)>>? sort = null,
+        List<Func<(Expression<Func<T, object?>> Expression, SortOrder Order)>>? sort = null,
         CancellationToken cancellationToken = default)
     {
         page = page < 1 ? 1 : page;
@@ -216,7 +216,7 @@ public class EntityRepositoryElasticSeach<T>(string indexName) : IEntityReposito
             Items = itemsTask.Result.Documents
         };
     }
-    private static IList<ISort>? GetSortList(List<Func<(Expression<Func<T, object>> Expression, SortOrder Order)>>? sort)
+    private static IList<ISort>? GetSortList(List<Func<(Expression<Func<T, object?>> Expression, SortOrder Order)>>? sort)
     {
         return sort?.Count > 0 ?
             [.. sort
@@ -241,6 +241,23 @@ public record PaginateElastic<T>
     public bool HasPrevious { get; set; }
     public bool HasNext { get; set; }
     public IReadOnlyCollection<T> Items { get; set; } = null!;
+}
+
+public static class UEntityExtensions
+{
+    public static PaginateElastic<TDestination> ConvertItems<TSource, TDestination>(this PaginateElastic<TSource> source, List<TDestination> items)
+    {
+        return new PaginateElastic<TDestination>
+        {
+            Page = source.Page,
+            Size = source.Size,
+            TotalCount = source.TotalCount,
+            PagesCount = source.PagesCount,
+            HasPrevious = source.HasPrevious,
+            HasNext = source.HasNext,
+            Items = items
+        };
+    }
 }
 
 public static class UEntityElasticSearchExtensions
