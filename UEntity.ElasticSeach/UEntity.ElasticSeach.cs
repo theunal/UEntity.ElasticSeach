@@ -1,8 +1,7 @@
-using Elasticsearch.Net;
 using Microsoft.Extensions.DependencyInjection;
-using Nest;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
+using Nest;
 
 namespace UEntity.ElasticSeach;
 
@@ -14,6 +13,23 @@ public interface IEntityRepositoryElasticSeach<T> where T : class
     Task<UpdateResponse<T>> UpdateAsync(T document, string id);
     Task<DeleteResponse> DeleteAsync(string id);
     Task<DeleteByQueryResponse> ExecuteDeleteAsync(Func<QueryContainerDescriptor<T>, QueryContainer> filter);
+
+    BulkResponse Bulk(Dictionary<string, T> entities);
+    Task<BulkResponse> BulkAsync(Dictionary<string, T> entities);
+
+    CountResponse Count(Func<QueryContainerDescriptor<T>, QueryContainer>? querySelector = null);
+    Task<CountResponse> CountAsync(Func<QueryContainerDescriptor<T>, QueryContainer>? querySelector = null);
+    PaginateElastic<T> GetListPaginate(
+       int page,
+       int size,
+       Func<QueryContainerDescriptor<T>, QueryContainer>? filter = null,
+       List<Func<(Expression<Func<T, object>> Expression, SortOrder Order)>>? sort = null);
+    Task<PaginateElastic<T>> GetListPaginateAsync(
+      int page,
+      int size,
+      Func<QueryContainerDescriptor<T>, QueryContainer>? filter = null,
+      List<Func<(Expression<Func<T, object>> Expression, SortOrder Order)>>? sort = null,
+      CancellationToken cancellationToken = default);
 }
 
 public class EntityRepositoryElasticSeach<T>(string indexName) : IEntityRepositoryElasticSeach<T> where T : class
